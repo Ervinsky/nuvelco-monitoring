@@ -74,10 +74,12 @@ export const AuthProvider = ({ children }) => {
         const { data: { session } } = await supabase.auth.getSession()
         if (session?.user) {
           setUser(session.user)
-          setProfile(buildProfile(session.user))
-          loadUserProfile(session.user).then(profileData => {
-            if (profileData) setProfile(profileData)
-          })
+          const profileData = await loadUserProfile(session.user)
+          if (profileData) {
+            setProfile(profileData)
+          } else {
+            setProfile(buildProfile(session.user))
+          }
         }
       } catch (err) {
         console.error('Session error:', err)
@@ -128,10 +130,12 @@ export const AuthProvider = ({ children }) => {
 
     if (data?.user) {
       setUser(data.user)
-      setProfile(buildProfile(data.user))
-      loadUserProfile(data.user).then(profileData => {
-        if (profileData) setProfile(profileData)
-      })
+      const profileData = await loadUserProfile(data.user)
+      if (profileData) {
+        setProfile(profileData)
+      } else {
+        setProfile(buildProfile(data.user))
+      }
     }
 
     return data
@@ -164,7 +168,7 @@ export const AuthProvider = ({ children }) => {
       setProfile(buildProfile(data.session.user))
       loadUserProfile(data.session.user).then(profileData => {
         if (profileData) setProfile(profileData)
-      })
+      }).catch(() => {})
     }
     
     return data
