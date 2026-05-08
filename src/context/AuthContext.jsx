@@ -32,9 +32,12 @@ export const AuthProvider = ({ children }) => {
 
         if (createError) {
           console.error('Error creating profile:', createError)
-          return null
+          return { id: authUser.id, name, role }
         }
         data = newProfile
+      } else if (error) {
+        console.error('Profile fetch error:', error)
+        return { id: authUser.id, name: authUser.email?.split('@')[0] || 'User', role: 'lineman' }
       }
 
       return data
@@ -80,7 +83,15 @@ export const AuthProvider = ({ children }) => {
         if (session?.user) {
           setUser(session.user)
           const profileData = await loadUserProfile(session.user)
-          if (profileData) setProfile(profileData)
+          if (profileData) {
+            setProfile(profileData)
+          } else {
+            setProfile({
+              id: session.user.id,
+              name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
+              role: session.user.user_metadata?.role || 'lineman',
+            })
+          }
         } else {
           setUser(null)
           setProfile(null)
@@ -114,11 +125,9 @@ export const AuthProvider = ({ children }) => {
     if (error) throw error
 
     if (data?.user) {
+      setUser(data.user)
       const profileData = await loadUserProfile(data.user)
-      if (profileData) {
-        setProfile(profileData)
-        setUser(data.user)
-      }
+      if (profileData) setProfile(profileData)
     }
 
     return data

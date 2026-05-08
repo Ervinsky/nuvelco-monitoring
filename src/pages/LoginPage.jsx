@@ -78,8 +78,12 @@ const LoginPage = () => {
           setFormData({ name: '', email: '', password: '', role: 'lineman' })
         }
       } else {
-        await login(formData.email, formData.password)
-        navigate('/dashboard', { replace: true })
+        const data = await login(formData.email, formData.password)
+        if (data?.user) {
+          navigate('/dashboard', { replace: true })
+        } else {
+          setError('Login succeeded but no user data returned. Please contact support.')
+        }
       }
     } catch (err) {
       const message = err.message || 'An error occurred. Please try again.'
