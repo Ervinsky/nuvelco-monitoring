@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Test User - NUVELCO</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>Create Test User for NUVELCO</h1>
+  <button onclick="createUser()">Create Test Admin User</button>
+  <div id="result"></div>
+
+  <script>
+    const supabaseUrl = 'https://fxoaqhunismtqaaetdjk.supabase.co'
+    const supabaseKey = 'sb_publishable_5WavWfbZcfFxSiQWomw8_w_GeZpjV-r'
+    const supabase = supabaseJs.createClient(supabaseUrl, supabaseKey)
+
+    async function createUser() {
+      const resultDiv = document.getElementById('result')
+      resultDiv.innerHTML = 'Creating user...'
+
+      try {
+        // Sign up a new user
+        const { data, error } = await supabase.auth.signUp({
+          email: 'admin@nuvelco.com',
+          password: 'admin123',
+          options: {
+            data: {
+              name: 'Admin User',
+              role: 'admin'
+            }
+          }
+        })
+
+        if (error) {
+          resultDiv.innerHTML = 'Error: ' + error.message
+          return
+        }
+
+        resultDiv.innerHTML = `
+          <p>User created successfully!</p>
+          <p>Email: admin@nuvelco.com</p>
+          <p>Password: admin123</p>
+          <p>Check browser console for details.</p>
+        `
+        console.log('User created:', data)
+
+        // Note: User will need to confirm email unless you disable email confirmation
+        // Go to Supabase Dashboard > Authentication > Settings > Disable "Enable email confirmations"
+      } catch (err) {
+        resultDiv.innerHTML = 'Error: ' + err.message
+      }
+    }
+  </script>
+</body>
+</html>

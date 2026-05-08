@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create NUVELCO Test User</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
+        button { background: #0066cc; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0052a3; }
+        #result { margin-top: 20px; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>NUVELCO - Create Test User</h1>
+    <p>This will create an admin user for testing the login.</p>
+    
+    <button onclick="createUser()">Create Test User</button>
+    <button onclick="signInTest()">Test Sign In</button>
+    
+    <div id="result"></div>
+
+    <script>
+        const supabaseUrl = 'https://fxoaqhunismtqaaetdjk.supabase.co'
+        const supabaseKey = 'sb_publishable_5WavWfbZcfFxSiQWomw8_w_GeZpjV-r'
+        const supabase = supabaseJs.createClient(supabaseUrl, supabaseKey)
+
+        function showResult(message, type = 'info') {
+            const result = document.getElementById('result')
+            result.className = type
+            result.innerHTML = message
+        }
+
+        async function createUser() {
+            showResult('Creating user...', 'info')
+            
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email: 'admin@nuvelco.com',
+                    password: 'admin123',
+                    options: {
+                        data: {
+                            name: 'Admin User',
+                            role: 'admin'
+                        }
+                    }
+                })
+
+                if (error) {
+                    if (error.message.includes('already registered')) {
+                        showResult('User already exists! Try signing in.', 'info')
+                    } else {
+                        showResult('Error: ' + error.message, 'error')
+                    }
+                    return
+                }
+
+                if (data.session) {
+                    showResult(`
+                        <h3>✅ User Created Successfully!</h3>
+                        <p><strong>Email:</strong> admin@nuvelco.com</p>
+                        <p><strong>Password:</strong> admin123</p>
+                        <p>You can now log in to the app!</p>
+                    `, 'success')
+                } else {
+                    showResult(`
+                        <h3>⚠️ User Created But Email Confirmation Required</h3>
+                        <p>Please do one of the following:</p>
+                        <ol>
+                            <li>Go to Supabase Dashboard > Authentication > Settings</li>
+                            <li>Turn OFF "Enable email confirmations"</li>
+                            <li>Or check the email for confirmation link</li>
+                        </ol>
+                    `, 'info')
+                }
+            } catch (err) {
+                showResult('Error: ' + err.message, 'error')
+            }
+        }
+
+        async function signInTest() {
+            showResult('Signing in...', 'info')
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: 'admin@nuvelco.com',
+                    password: 'admin123'
+                })
+
+                if (error) {
+                    showResult('Sign in error: ' + error.message, 'error')
+                    return
+                }
+
+                showResult(`
+                    <h3>✅ Sign In Successful!</h3>
+                    <p>User: ${data.user.email}</p>
+                    <p>Session: Active</p>
+                    <p>You can now use these credentials in the app!</p>
+                `, 'success')
+                
+                // Sign out after test
+                await supabase.auth.signOut()
+            } catch (err) {
+                showResult('Error: ' + err.message, 'error')
+            }
+        }
+    </script>
+</body>
+</html>
