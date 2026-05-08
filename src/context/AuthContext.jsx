@@ -7,6 +7,12 @@ export const useAuth = () => useContext(AuthContext)
 
 const devUserRoles = {}
 
+const buildProfile = (authUser) => ({
+  id: authUser.id,
+  name: authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'User',
+  role: authUser.user_metadata?.role || 'lineman',
+})
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
@@ -32,12 +38,12 @@ export const AuthProvider = ({ children }) => {
 
         if (createError) {
           console.error('Error creating profile:', createError)
-          return { id: authUser.id, name, role }
+          return buildProfile(authUser)
         }
         data = newProfile
       } else if (error) {
         console.error('Profile fetch error:', error)
-        return { id: authUser.id, name: authUser.email?.split('@')[0] || 'User', role: 'lineman' }
+        return buildProfile(authUser)
       }
 
       return data
@@ -68,8 +74,10 @@ export const AuthProvider = ({ children }) => {
         const { data: { session } } = await supabase.auth.getSession()
         if (session?.user) {
           setUser(session.user)
-          const profileData = await loadUserProfile(session.user)
-          if (profileData) setProfile(profileData)
+          setProfile(buildProfile(session.user))
+          loadUserProfile(session.user).then(profileData => {
+            if (profileData) setProfile(profileData)
+          })
         }
       } catch (err) {
         console.error('Session error:', err)
@@ -79,19 +87,13 @@ export const AuthProvider = ({ children }) => {
     }
 
     if (!import.meta.env.DEV) {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (session?.user) {
           setUser(session.user)
-          const profileData = await loadUserProfile(session.user)
-          if (profileData) {
-            setProfile(profileData)
-          } else {
-            setProfile({
-              id: session.user.id,
-              name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'User',
-              role: session.user.user_metadata?.role || 'lineman',
-            })
-          }
+          setProfile(buildProfile(session.user))
+          loadUserProfile(session.user).then(profileData => {
+            if (profileData) setProfile(profileData)
+          })
         } else {
           setUser(null)
           setProfile(null)
@@ -126,8 +128,10 @@ export const AuthProvider = ({ children }) => {
 
     if (data?.user) {
       setUser(data.user)
-      const profileData = await loadUserProfile(data.user)
-      if (profileData) setProfile(profileData)
+      setProfile(buildProfile(data.user))
+      loadUserProfile(data.user).then(profileData => {
+        if (profileData) setProfile(profileData)
+      })
     }
 
     return data
@@ -157,8 +161,10 @@ export const AuthProvider = ({ children }) => {
     
     if (data?.session) {
       setUser(data.session.user)
-      const profileData = await loadUserProfile(data.session.user)
-      if (profileData) setProfile(profileData)
+      setProfile(buildProfile(data.session.user))
+      loadUserProfile(data.session.user).then(profileData => {
+        if (profileData) setProfile(profileData)
+      })
     }
     
     return data
