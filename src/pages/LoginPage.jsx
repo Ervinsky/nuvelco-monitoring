@@ -210,7 +210,7 @@ const LoginPage = () => {
               </div>
               <div className="mt-8 flex items-center gap-2 text-sm text-gray-500">
                 <div className="w-8 h-px bg-emerald-500/40" />
-                <span>Secure Admin Access</span>
+                <span>Secure by the OJTS' Access, Aldersgate College</span>
               </div>
             </div>
 
@@ -362,7 +362,7 @@ const LoginPage = () => {
                   </span>
                 </button>
                 <p className="mt-5 text-center text-gray-600 text-[11px] tracking-wider uppercase">
-                  Secure Admin Access &bull; Solano Nueva Vizcaya
+                  Secure by the OJTS' Access, Aldersgate College
                 </p>
               </CardFooter>
             </Card>
