@@ -1,7 +1,7 @@
 import { useAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, AlertCircle, Shield, Zap } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../components/shadcn/card'
 import { Button } from '../components/shadcn/button'
 import { Input } from '../components/shadcn/input'
@@ -111,126 +111,156 @@ const LoginPage = () => {
   return (
     <>
       <style>{`
-        @keyframes slideInLeft {
-          from { opacity: 0; transform: translateX(-60px); }
-          to { opacity: 1; transform: translateX(0); }
+        @keyframes float {
+          0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+          50% { transform: translateY(-30px) scale(1.1); opacity: 0.5; }
         }
-        @keyframes slideInRight {
-          from { opacity: 0; transform: translateX(60px); }
-          to { opacity: 1; transform: translateX(0); }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(30px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        @keyframes pulse-logo {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.1); opacity: 0.8; }
+        @keyframes fadeScale {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
         }
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        @keyframes shimmer {
+          0% { background-position: -200% center; }
+          100% { background-position: 200% center; }
         }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+        @keyframes pulse-ring {
+          0% { transform: scale(1); opacity: 0.5; }
+          50% { transform: scale(1.05); opacity: 0.2; }
+          100% { transform: scale(1); opacity: 0.5; }
         }
-        .animate-slide-left {
-          animation: slideInLeft 0.8s ease-out forwards;
+        @keyframes gradientShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
         }
-        .animate-slide-right {
-          animation: slideInRight 0.8s ease-out 0.2s forwards;
-          opacity: 0;
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        .animate-float-delayed { animation: float 8s ease-in-out infinite; animation-delay: -3s; }
+        .animate-slide-up { animation: slideUp 0.7s ease-out forwards; }
+        .animate-slide-up-delayed { animation: slideUp 0.7s ease-out 0.15s forwards; opacity: 0; }
+        .animate-slide-up-slow { animation: slideUp 0.7s ease-out 0.3s forwards; opacity: 0; }
+        .animate-fade-scale { animation: fadeScale 0.5s ease-out forwards; }
+        .animate-shimmer {
+          background: linear-gradient(90deg, rgba(16,185,129,0) 0%, rgba(16,185,129,0.1) 50%, rgba(16,185,129,0) 100%);
+          background-size: 200% 100%;
+          animation: shimmer 3s ease-in-out infinite;
         }
-        .animate-pulse-logo {
-          animation: pulse-logo 1.5s ease-in-out infinite;
-        }
-        .animate-spin-slow {
-          animation: spin-slow 3s linear infinite;
-        }
-        .animate-fade-in {
-          animation: fadeIn 0.3s ease-out forwards;
+        .animate-gradient {
+          background-size: 200% 200%;
+          animation: gradientShift 8s ease infinite;
         }
       `}</style>
 
-      {/* Login/Signup Loading Overlay */}
       {loading && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0a0f1a]/95 backdrop-blur-sm animate-fade-in">
-          <div className="relative">
-            <div className="absolute inset-0 w-32 h-32 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin-slow" />
-            <div className="w-24 h-24 flex items-center justify-center animate-pulse-logo">
-              <img src="/logo-nuv.png" alt="NUVELCO Logo" className="w-20 h-20 object-contain" />
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#060b18]/95 backdrop-blur-xl animate-fade-scale">
+          <div className="relative mb-6">
+            <div className="absolute inset-0 w-28 h-28 rounded-full bg-emerald-500/20 animate-pulse-ring" />
+            <div className="absolute inset-0 w-28 h-28 border-2 border-emerald-500/20 border-t-emerald-400 rounded-full animate-spin" style={{ animationDuration: '1.5s' }} />
+            <div className="w-28 h-28 flex items-center justify-center">
+              <img src="/logo-nuv.png" alt="NUVELCO Logo" className="w-16 h-16 object-contain" />
             </div>
           </div>
-          <h2 className="mt-8 text-2xl font-bold text-white tracking-wide">
+          <h2 className="mt-4 text-2xl font-bold text-white tracking-wide">
             {isSignup ? 'Creating Account' : 'Signing In'}
           </h2>
-          <p className="mt-2 text-gray-400">
-            {isSignup ? 'Please wait while we set up your account...' : 'Verifying your credentials...'}
+          <p className="mt-2 text-gray-500 text-sm">
+            {isSignup ? 'Setting up your account...' : 'Verifying your credentials...'}
           </p>
-          <div className="mt-6 flex items-center gap-2">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          <div className="mt-8 flex gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '0ms', animationDuration: '1s' }} />
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '150ms', animationDuration: '1s' }} />
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-bounce" style={{ animationDelay: '300ms', animationDuration: '1s' }} />
           </div>
         </div>
       )}
 
-      <div className="relative min-h-screen flex overflow-hidden">
-        {/* Background */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: 'url(/background-nuv.jpg)', filter: 'blur(8px)', transform: 'scale(1.1)' }}
-        />
-        <div className="absolute inset-0 bg-gray-900/50" />
+      <div className="relative min-h-screen flex overflow-hidden bg-[#060b18]">
+        {/* Animated gradient orbs */}
+        <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl animate-float" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-blue-500/10 blur-3xl animate-float-delayed" />
+        <div className="absolute top-1/2 left-1/3 w-64 h-64 rounded-full bg-emerald-400/5 blur-3xl animate-float" style={{ animationDelay: '-2s' }} />
 
-        {/* Content centered */}
-        <div className="relative z-10 flex items-center justify-center w-full px-8 lg:px-16">
-          <div className="flex items-center gap-16 lg:gap-24">
+        {/* Background image with overlay */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-30"
+          style={{ backgroundImage: 'url(/background-nuv.jpg)' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#060b18]/80 via-[#0a1628]/70 to-[#060b18]/90" />
+
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]" />
+
+        <div className="relative z-10 flex items-center justify-center w-full px-6 lg:px-16">
+          <div className="flex items-center gap-20 lg:gap-28">
             {/* Left branding */}
-            <div className="hidden lg:flex flex-col items-start animate-slide-left">
-              <h1 className="font-bold text-emerald-500 tracking-tight" style={{ fontSize: '55px' }}>
+            <div className="hidden lg:flex flex-col items-start max-w-md">
+              <div className="relative mb-8">
+                <div className="absolute -inset-4 rounded-full bg-emerald-500/20 blur-xl" />
+                <img src="/logo-nuv.png" alt="NUVELCO Logo" className="w-20 h-20 object-contain relative" />
+              </div>
+              <h1 className="font-extrabold tracking-tight bg-gradient-to-r from-emerald-400 via-emerald-500 to-teal-400 bg-clip-text text-transparent animate-gradient" style={{ fontSize: '56px', lineHeight: '1.1' }}>
                 NUVELCO
               </h1>
-              <div className="mt-4 space-y-1">
-                <h2 className="font-semibold text-white" style={{ fontSize: '42px' }}>Scheduled Monitoring</h2>
-                <h2 className="font-semibold text-white" style={{ fontSize: '42px' }}>Management System</h2>
+              <div className="mt-6 space-y-2">
+                <p className="text-3xl font-bold text-white/90 tracking-tight">Scheduled Monitoring</p>
+                <p className="text-3xl font-bold text-white/90 tracking-tight">Management System</p>
+              </div>
+              <div className="mt-8 flex items-center gap-2 text-sm text-gray-500">
+                <div className="w-8 h-px bg-emerald-500/40" />
+                <span>Secure Admin Access</span>
               </div>
             </div>
 
             {/* Login card */}
-            <Card className="bg-gray-900/80 backdrop-blur-xl border-gray-700 shadow-2xl w-full max-w-md animate-slide-right">
-              <div className="flex justify-center pt-8">
-                <img src="/logo-nuv.png" alt="NUVELCO Logo" className="w-16 h-16 object-contain" />
+            <Card className="relative w-full max-w-[420px] bg-[#0d1b2a]/80 backdrop-blur-2xl border border-white/[0.06] shadow-2xl shadow-emerald-500/5 overflow-hidden animate-fade-scale">
+              {/* Subtle top glow */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
+
+              <div className="relative px-8 pt-10 pb-4 flex flex-col items-center">
+                <div className="relative mb-5">
+                  <div className="absolute inset-0 w-16 h-16 rounded-full bg-emerald-500/10 blur-md" />
+                  <img src="/logo-nuv.png" alt="NUVELCO Logo" className="w-14 h-14 object-contain relative" />
+                </div>
+
+                <CardHeader className="text-center p-0 mb-6">
+                  <CardTitle className="text-white/90 text-xl font-semibold tracking-tight">
+                    {isSignup ? 'Create Account' : 'Welcome Back'}
+                  </CardTitle>
+                  <CardDescription className="text-gray-500 text-sm mt-1.5">
+                    {isSignup ? 'Register to manage schedules and tasks' : 'Sign in to access your dashboard'}
+                  </CardDescription>
+                </CardHeader>
               </div>
 
-              <CardHeader className="text-center pt-4 pb-2">
-                <CardTitle className="text-white text-2xl">
-                  {isSignup ? 'Create Account' : 'Welcome Back'}
-                </CardTitle>
-                <CardDescription className="text-gray-400 text-base">
-                  {isSignup ? 'Register to manage schedules and tasks' : 'Sign in to access your dashboard'}
-                </CardDescription>
-              </CardHeader>
-
-              <CardContent>
+              <CardContent className="px-8 pb-2">
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {isSignup && (
-                    <Input
-                      label="Full Name"
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={formData.name}
-                      onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    />
+                    <div className="animate-slide-up">
+                      <Input
+                        label="Full Name"
+                        type="text"
+                        placeholder="Enter your full name"
+                        value={formData.name}
+                        onChange={e => setFormData({ ...formData, name: e.target.value })}
+                      />
+                    </div>
                   )}
 
-                  <Input
-                    label="Email Address"
-                    type="email"
-                    placeholder="Enter your email"
-                    value={formData.email}
-                    onChange={e => setFormData({ ...formData, email: e.target.value })}
-                  />
+                  <div className={isSignup ? 'animate-slide-up-delayed' : ''}>
+                    <Input
+                      label="Email Address"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={formData.email}
+                      onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    />
+                  </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Password</label>
+                  <div className={isSignup ? 'animate-slide-up-slow' : ''}>
+                    <label className="block text-sm font-medium text-gray-400 mb-1.5">Password</label>
                     <div className="relative">
                       <input
                         type={showPassword ? 'text' : 'password'}
@@ -238,12 +268,12 @@ const LoginPage = () => {
                         value={formData.password}
                         onChange={e => setFormData({ ...formData, password: e.target.value })}
                         minLength={6}
-                        className="flex h-10 w-full rounded-lg border border-gray-600 bg-gray-800 px-3 pr-10 py-2 text-sm text-white placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                        className="flex h-10 w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 pr-10 py-2 text-sm text-white/90 placeholder:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/60 focus-visible:border-emerald-500/40 transition-all duration-200"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-300 transition-colors duration-200"
                       >
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
@@ -251,53 +281,83 @@ const LoginPage = () => {
                   </div>
 
                   {isSignup && (
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-300">Role</label>
+                    <div className="space-y-2 animate-slide-up-slow">
+                      <label className="block text-sm font-medium text-gray-400">Role</label>
                       <div className="grid grid-cols-2 gap-3">
-                        <Button
+                        <button
                           type="button"
-                          variant={formData.role === 'admin' ? 'default' : 'outline'}
                           onClick={() => setFormData({ ...formData, role: 'admin' })}
+                          className={`relative flex items-center justify-center gap-2 h-11 rounded-lg border text-sm font-medium transition-all duration-200 ${
+                            formData.role === 'admin'
+                              ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400 shadow-[0_0_20px_-4px_rgba(16,185,129,0.2)]'
+                              : 'border-white/[0.06] bg-white/[0.02] text-gray-500 hover:text-gray-300 hover:border-white/10'
+                          }`}
                         >
-                          Admin
-                        </Button>
-                        <Button
+                          {formData.role === 'admin' && (
+                            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-emerald-500/5 to-transparent animate-shimmer" />
+                          )}
+                          <Shield className="w-4 h-4 relative" />
+                          <span className="relative">Admin</span>
+                        </button>
+                        <button
                           type="button"
-                          variant={formData.role === 'lineman' ? 'default' : 'outline'}
                           onClick={() => setFormData({ ...formData, role: 'lineman' })}
+                          className={`relative flex items-center justify-center gap-2 h-11 rounded-lg border text-sm font-medium transition-all duration-200 ${
+                            formData.role === 'lineman'
+                              ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400 shadow-[0_0_20px_-4px_rgba(16,185,129,0.2)]'
+                              : 'border-white/[0.06] bg-white/[0.02] text-gray-500 hover:text-gray-300 hover:border-white/10'
+                          }`}
                         >
-                          Lineman
-                        </Button>
+                          {formData.role === 'lineman' && (
+                            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-emerald-500/5 to-transparent animate-shimmer" />
+                          )}
+                          <Zap className="w-4 h-4 relative" />
+                          <span className="relative">Lineman</span>
+                        </button>
                       </div>
                     </div>
                   )}
 
                   {error && (
-                    <div className="flex items-start gap-2.5 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                    <div className="flex items-start gap-2.5 p-3 bg-red-500/8 border border-red-500/15 rounded-lg animate-fade-scale">
                       <AlertCircle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
-                      <p className="text-red-400 text-sm">{error}</p>
+                      <p className="text-red-400 text-sm leading-relaxed">{error}</p>
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                    {loading ? 'Please wait...' : isSignup ? 'Create Account' : 'Sign In'}
-                    {!loading && <ArrowRight className="w-4 h-4" />}
+                  <Button
+                    type="submit"
+                    className="relative w-full h-11 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-medium shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all duration-300 overflow-hidden group"
+                    disabled={loading}
+                  >
+                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+                    <span className="relative flex items-center justify-center gap-2">
+                      {loading ? 'Please wait...' : isSignup ? 'Create Account' : 'Sign In'}
+                      {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform duration-200" />}
+                    </span>
                   </Button>
                 </form>
               </CardContent>
 
-              <CardFooter className="flex flex-col gap-3">
-                <p className="text-center text-sm text-gray-500">
-                  {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}
-                  <button
-                    onClick={switchMode}
-                    className="text-emerald-500 font-medium hover:underline"
-                  >
-                    {isSignup ? 'Sign In' : 'Sign Up'}
-                  </button>
-                </p>
-                <p className="text-center text-gray-500 text-xs">
-                  Secure Admin Access Only &bull; Solano Nueva Vizcaya
+              <CardFooter className="flex flex-col gap-0 px-8 pb-8 pt-4">
+                <div className="w-full flex items-center gap-3 mb-4">
+                  <div className="flex-1 h-px bg-white/[0.04]" />
+                  <span className="text-xs text-gray-600 font-medium uppercase tracking-wider">
+                    {isSignup ? 'Registered?' : 'New here?'}
+                  </span>
+                  <div className="flex-1 h-px bg-white/[0.04]" />
+                </div>
+                <button
+                  onClick={switchMode}
+                  className="group text-sm font-medium text-gray-500 hover:text-emerald-400 transition-colors duration-200"
+                >
+                  <span className="inline-flex items-center gap-1">
+                    {isSignup ? 'Sign In' : 'Create an Account'}
+                    <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+                  </span>
+                </button>
+                <p className="mt-5 text-center text-gray-600 text-[11px] tracking-wider uppercase">
+                  Secure Admin Access &bull; Solano Nueva Vizcaya
                 </p>
               </CardFooter>
             </Card>
