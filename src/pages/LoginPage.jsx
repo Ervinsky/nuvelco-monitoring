@@ -215,7 +215,12 @@ const LoginPage = () => {
             </div>
 
             {/* Login card */}
-            <Card className="relative w-full max-w-[420px] bg-[#0d1b2a]/80 backdrop-blur-2xl border border-white/[0.06] shadow-2xl shadow-emerald-500/5 overflow-hidden animate-fade-scale">
+            <div className="relative w-full max-w-[420px]">
+              {/* Backward border - only on sides, white, behind the card */}
+              <div className="absolute -left-1 -right-1 top-2 bottom-2 rounded-xl border border-white/[0.06]" />
+              <div className="absolute -left-[3px] -right-[3px] top-4 bottom-4 rounded-xl border border-white/10" />
+
+            <Card className="relative w-full bg-[#0d1b2a]/80 backdrop-blur-2xl border border-white/[0.06] shadow-2xl shadow-emerald-500/5 overflow-hidden animate-fade-scale">
               {/* Subtle top glow */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent" />
 
@@ -361,6 +366,7 @@ const LoginPage = () => {
                 </p>
               </CardFooter>
             </Card>
+            </div>
           </div>
         </div>
       </div>
