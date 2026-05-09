@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase'
 
-const isDev = import.meta.env.DEV
+const useFallback = import.meta.env.DEV || !supabase
 const DEV_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 // In-memory storage for dev mode
@@ -21,7 +21,7 @@ const generateUUID = () => {
 
 export const taskService = {
   getAll: async () => {
-    if (isDev) {
+    if (useFallback) {
       return devTasks.map(task => {
         const assignments = devTaskAssignments
           .filter(a => a.task_id === task.id)
@@ -61,7 +61,7 @@ export const taskService = {
   },
 
   getById: async (id) => {
-    if (isDev) {
+    if (useFallback) {
       const task = devTasks.find(t => t.id === id)
       if (!task) throw new Error('Task not found')
       const assignments = devTaskAssignments
@@ -102,7 +102,7 @@ export const taskService = {
   },
 
   create: async (task, assignedUserIds) => {
-    if (isDev) {
+    if (useFallback) {
       const newTask = {
         id: generateUUID(),
         ...task,
@@ -148,7 +148,7 @@ export const taskService = {
   },
 
   update: async (id, updates) => {
-    if (isDev) {
+    if (useFallback) {
       const idx = devTasks.findIndex(t => t.id === id)
       if (idx === -1) throw new Error('Task not found')
       devTasks[idx] = { ...devTasks[idx], ...updates, updated_at: new Date().toISOString() }
@@ -166,7 +166,7 @@ export const taskService = {
   },
 
   delete: async (id) => {
-    if (isDev) {
+    if (useFallback) {
       const idx = devTasks.findIndex(t => t.id === id)
       if (idx === -1) throw new Error('Task not found')
       devTasks.splice(idx, 1)
@@ -182,7 +182,7 @@ export const taskService = {
   },
 
   updateAssignments: async (taskId, userIds) => {
-    if (isDev) {
+    if (useFallback) {
       devTaskAssignments = devTaskAssignments.filter(a => a.task_id !== taskId)
       for (const userId of userIds) {
         devTaskAssignments.push({
@@ -204,7 +204,7 @@ export const taskService = {
   },
 
   getAssignedToUser: async (userId) => {
-    if (isDev) {
+    if (useFallback) {
       const assignedTaskIds = devTaskAssignments
         .filter(a => a.user_id === userId)
         .map(a => a.task_id)
@@ -243,7 +243,7 @@ export const taskService = {
   },
 
   addRemark: async (taskId, userId, message) => {
-    if (isDev) {
+    if (useFallback) {
       const newRemark = {
         id: generateUUID(),
         task_id: taskId,
@@ -265,7 +265,7 @@ export const taskService = {
   },
 
   subscribeToTasks: (callback) => {
-    if (isDev) {
+    if (useFallback) {
       return {
         unsubscribe: () => {},
       }
@@ -281,7 +281,7 @@ export const taskService = {
   },
 
   subscribeToRemarks: (taskId, callback) => {
-    if (isDev) {
+    if (useFallback) {
       return {
         unsubscribe: () => {},
       }
@@ -299,7 +299,7 @@ export const taskService = {
 
 export const userService = {
   getAll: async () => {
-    if (isDev) {
+    if (useFallback) {
       return [...devUsers].sort((a, b) => a.name.localeCompare(b.name))
     }
 
@@ -312,7 +312,7 @@ export const userService = {
   },
 
   getLinemen: async () => {
-    if (isDev) {
+    if (useFallback) {
       return devUsers.filter(u => u.role === 'lineman').sort((a, b) => a.name.localeCompare(b.name))
     }
 
@@ -326,7 +326,7 @@ export const userService = {
   },
 
   create: async (userData) => {
-    if (isDev) {
+    if (useFallback) {
       const newUser = {
         id: generateUUID(),
         ...userData,
@@ -346,7 +346,7 @@ export const userService = {
   },
 
   update: async (id, updates) => {
-    if (isDev) {
+    if (useFallback) {
       const idx = devUsers.findIndex(u => u.id === id)
       if (idx === -1) throw new Error('User not found')
       devUsers[idx] = { ...devUsers[idx], ...updates }
@@ -364,7 +364,7 @@ export const userService = {
   },
 
   delete: async (id) => {
-    if (isDev) {
+    if (useFallback) {
       const idx = devUsers.findIndex(u => u.id === id)
       if (idx === -1) throw new Error('User not found')
       if (id === DEV_USER_ID) throw new Error('Cannot delete dev admin user')
@@ -381,7 +381,7 @@ export const userService = {
 
 export const dashboardService = {
   getStats: async () => {
-    if (isDev) {
+    if (useFallback) {
       const linemen = devUsers.filter(u => u.role === 'lineman')
       return {
         total: devTasks.length,
