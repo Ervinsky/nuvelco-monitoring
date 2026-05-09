@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
         const devUserId = '00000000-0000-0000-0000-000000000001'
         const lastEmail = sessionStorage.getItem('dev_last_email')
         const email = lastEmail || 'lineman@nuvelco.com'
-        const role = devUserRoles[email] || 'lineman'
+        const role = sessionStorage.getItem('dev_last_role') || 'lineman'
         setUser({ id: devUserId, email, user_metadata: { name: email.split('@')[0], role } })
         setProfile({ id: devUserId, name: email.split('@')[0], role })
         setLoading(false)
@@ -120,6 +120,7 @@ export const AuthProvider = ({ children }) => {
         devUserRoles[normalizedEmail] = 'lineman'
       }
       const role = devUserRoles[normalizedEmail]
+      sessionStorage.setItem('dev_last_role', role)
       const devUserId = '00000000-0000-0000-0000-000000000001'
       setUser({ id: devUserId, email: normalizedEmail, user_metadata: { name: normalizedEmail.split('@')[0], role } })
       setProfile({ id: devUserId, name: normalizedEmail.split('@')[0], role })
@@ -148,6 +149,7 @@ export const AuthProvider = ({ children }) => {
       sessionStorage.removeItem('dev_logged_out')
       const normalizedEmail = email.trim().toLowerCase()
       sessionStorage.setItem('dev_last_email', normalizedEmail)
+      sessionStorage.setItem('dev_last_role', role)
       devUserRoles[normalizedEmail] = role
       const devUserId = '00000000-0000-0000-0000-000000000001'
       setUser({ id: devUserId, email: normalizedEmail, user_metadata: { name, role } })
@@ -180,6 +182,7 @@ export const AuthProvider = ({ children }) => {
     if (useFallback) {
       sessionStorage.setItem('dev_logged_out', 'true')
       sessionStorage.removeItem('dev_last_email')
+      sessionStorage.removeItem('dev_last_role')
       setUser(null)
       setProfile(null)
       setLoading(false)
