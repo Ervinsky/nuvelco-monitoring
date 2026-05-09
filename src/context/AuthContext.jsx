@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
+const useFallback = import.meta.env.DEV || !supabase
+
 const AuthContext = createContext({})
 
 export const useAuth = () => useContext(AuthContext)
@@ -55,7 +57,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
-      if (import.meta.env.DEV) {
+      if (useFallback) {
         if (sessionStorage.getItem('dev_logged_out') === 'true') {
           setLoading(false)
           return
@@ -88,7 +90,7 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    if (!import.meta.env.DEV) {
+    if (!useFallback) {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
         if (session?.user) {
           setUser(session.user)
@@ -110,7 +112,7 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const login = async (email, password) => {
-    if (import.meta.env.DEV) {
+    if (useFallback) {
       sessionStorage.removeItem('dev_logged_out')
       const normalizedEmail = email.trim().toLowerCase()
       sessionStorage.setItem('dev_last_email', normalizedEmail)
@@ -142,7 +144,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   const signup = async (email, password, name, role) => {
-    if (import.meta.env.DEV) {
+    if (useFallback) {
       sessionStorage.removeItem('dev_logged_out')
       const normalizedEmail = email.trim().toLowerCase()
       sessionStorage.setItem('dev_last_email', normalizedEmail)
@@ -175,7 +177,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   const logout = async () => {
-    if (import.meta.env.DEV) {
+    if (useFallback) {
       sessionStorage.setItem('dev_logged_out', 'true')
       sessionStorage.removeItem('dev_last_email')
       setUser(null)
@@ -200,7 +202,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (updates) => {
     if (!user) throw new Error('No user logged in')
-    if (import.meta.env.DEV) {
+    if (useFallback) {
       setProfile(prev => ({ ...prev, ...updates }))
       return { ...profile, ...updates }
     }
@@ -216,7 +218,7 @@ export const AuthProvider = ({ children }) => {
   }
 
   const updatePassword = async (newPassword) => {
-    if (import.meta.env.DEV) {
+    if (useFallback) {
       throw new Error('Password update is not available in dev mode')
     }
     const { error } = await supabase.auth.updateUser({ password: newPassword })
